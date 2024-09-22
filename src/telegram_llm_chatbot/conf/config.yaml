@@ -1,5 +1,5 @@
 service:
-  base_url: "http://94.131.119.139:8000"
+  base_url: "https://crispy-potato-694g7jjp6rjxf4677-8000.app.github.dev"
 strings:
   help: "This is a bot to interacte with llm chatbot. Use menu to navigate."
   add_chat_ask_name: "Enter the name of the chat:"

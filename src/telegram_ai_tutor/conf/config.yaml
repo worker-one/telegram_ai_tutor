@@ -1,0 +1,35 @@
+service:
+  base_url: "https://zany-space-fiesta-pjprqxx6v9vqh77qw-8000.app.github.dev"
+strings:
+  ru:
+    main_menu: "Главное меню"
+    menu:
+      language: "Выберите язык"
+      start_chat: "Начать чат"
+      short_mode: "Краткое объяснение"
+      step_by_step_mode: "Пошаговое объяснение"
+      billing: "Тарифный план"
+      feedback: "Обратная связь"
+    ask_query: "Введите вашу задачу текстом или отправьте изображение"
+  en:
+    main_menu: "Main menu"
+    menu:
+      language: "Choose language"
+      start_chat: "Start chat"
+      short_mode: "Short explanation"
+      step_by_step_mode: "Step-by-step explanation"
+      billing: "Billing"
+      feedback: "Feedback"
+    ask_query: "Enter your problem in text or send an image"
+    
+prompts:
+  - id: 1
+    name: "Short exaplantion"
+    prompt: |
+      Please provide a short explanation
+      of the solution for the problem.\n\n{user_message}
+  - id: 2
+    name: "Step-by-step explanation."
+    prompt: |
+      Please provide a detailed step-by-step explanation
+      of the solution for the problem. Be pedagogical and patient\n\n{user_message}

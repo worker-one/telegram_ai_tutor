@@ -36,7 +36,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: workerone/telegram_llm_chatbot:latest
+          tags: workerone/telegram_ai_tutor:latest
 
       - name: Log out from DockerHub
         run: docker logout

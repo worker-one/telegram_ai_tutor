@@ -1,17 +1,17 @@
 import logging.config
 import os
-import requests
 
+import requests
 import telebot
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 
-from telegram_llm_chatbot.api.handlers import chats, llm, users
-from telegram_llm_chatbot.db import crud, database
+from telegram_ai_tutor.api.handlers import chats, llm, menu, users
+from telegram_ai_tutor.db import crud
 
 # Load logging configuration with OmegaConf
 logging_config = OmegaConf.to_container(
-    OmegaConf.load("./src/telegram_llm_chatbot/conf/logging_config.yaml"),
+    OmegaConf.load("./src/telegram_ai_tutor/conf/logging_config.yaml"),
     resolve=True
 )
 logging.config.dictConfig(logging_config)
@@ -26,7 +26,7 @@ if BOT_TOKEN is None:
 
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode=None)
 
-cfg = OmegaConf.load("./src/telegram_llm_chatbot/conf/config.yaml")
+cfg = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
 
 # Define the base URL of your API
 base_url = cfg.service.base_url
@@ -58,4 +58,6 @@ def start_bot():
     chats.register_handlers(bot)
     llm.register_handlers(bot)
     users.register_handlers(bot)
-    bot.infinity_polling()
+    menu.register_handlers(bot)
+    #bot.infinity_polling()
+    bot.polling()

@@ -11,7 +11,7 @@ from .models import Base
 
 # Load logging configuration with OmegaConf
 logging_config = OmegaConf.to_container(
-    OmegaConf.load("./src/telegram_llm_chatbot/conf/logging_config.yaml"),
+    OmegaConf.load("./src/telegram_ai_tutor/conf/logging_config.yaml"),
     resolve=True
 )
 

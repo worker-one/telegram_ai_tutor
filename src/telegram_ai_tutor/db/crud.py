@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from sqlalchemy.orm import Session
 
 from .database import get_session
 from .models import User

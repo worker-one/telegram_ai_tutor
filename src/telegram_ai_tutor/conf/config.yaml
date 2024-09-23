@@ -27,9 +27,13 @@ prompts:
     name: "Short exaplantion"
     prompt: |
       Please provide a short explanation
-      of the solution for the problem.\n\n{user_message}
+      of the solution for the problem.
+      Write final answer to the problem as a json block
+      with a key "answer" and a value like "x = 5". \n\nThe problem: `{user_message}`
   - id: 2
     name: "Step-by-step explanation."
     prompt: |
       Please provide a detailed step-by-step explanation
-      of the solution for the problem. Be pedagogical and patient\n\n{user_message}
+      of the solution for the problem. Be pedagogical and patient.
+      Use latex language to write your formulas. Format your response as a html page
+      with latex support. The problem: \n\n{user_message}

@@ -2,8 +2,11 @@ import logging.config
 
 import requests
 from omegaconf import OmegaConf
+from telebot.types import Message
 
-from telegram_ai_tutor.db import crud, database
+from telegram_ai_tutor.db import crud
+from telegram_ai_tutor.utils.html import extract_and_save_html
+from telegram_ai_tutor.utils.json import extract_json_from_text
 
 # Load logging configuration with OmegaConf
 logging_config = OmegaConf.to_container(
@@ -20,9 +23,9 @@ strings = config.strings
 
 def register_handlers(bot):
 
-    # Query
+    # Short mode
     @bot.callback_query_handler(func=lambda call: call.data == "_short_mode")
-    def query(call):
+    def short_mode(call):
         logger.info({"user_id": call.from_user.id, "message": call.data})
         user_id = call.from_user.id
         user = crud.get_user(user_id)
@@ -31,7 +34,6 @@ def register_handlers(bot):
         bot.send_message(call.message.chat.id, strings[lang].ask_query)
         bot.register_next_step_handler(call.message, _short_mode)
 
-    # Define the command for invoking the chatbot
     @bot.message_handler(content_types=['text'], func=lambda message: message.text[0] != "/")
     def _short_mode(message):
         user_id = int(message.chat.id)
@@ -87,4 +89,81 @@ def register_handlers(bot):
                 }
             )
         response_content = response.json()["model_response"]["response_content"]
-        bot.reply_to(message, response_content, parse_mode="markdown")
+        try:
+            json_content = extract_json_from_text(response_content)
+            bot.reply_to(message, json_content["answer"], parse_mode="markdown")
+        except:
+            bot.reply_to(message, response_content, parse_mode="markdown")
+
+    # Step by step mode
+    @bot.callback_query_handler(func=lambda call: call.data == "_step_by_step_mode")
+    def step_by_step_mode(call):
+        logger.info({"user_id": call.from_user.id, "message": call.data})
+        user_id = call.from_user.id
+        user = crud.get_user(user_id)
+        lang = user.language
+
+        bot.send_message(call.message.chat.id, strings[lang].ask_query)
+        bot.register_next_step_handler(call.message, _step_by_step_mode)
+
+    @bot.message_handler(content_types=['text'], func=lambda message: message.text[0] != "/")
+    def _step_by_step_mode(message: Message) -> None:
+        user_id = int(message.chat.id)
+        user_message = message.text
+
+        # add user to database if not already present
+        if not crud.get_user(user_id):
+            logger.info(f"User with id {user_id} not found in the database.")
+            crud.upsert_user(user_id, message.chat.username)
+
+        # check if user exists in the database
+        response = requests.get(f"{base_url}/users/{user_id}")
+        if response.status_code == 404:
+            # add user via api
+            response = requests.post(
+                f"{base_url}/users",
+                json={
+                    "user": {
+                        "id": user_id,
+                        "name": message.chat.username
+                    }
+                }
+            )
+            if response.status_code == 200:
+                logger.info(f"User with id {user_id} added successfully.")
+            else:
+                logger.error(f"Error adding user with id {user_id}: {response.json()['message']}")
+
+            # add a chat for this user
+            response = requests.post(
+                f"{base_url}/chats",
+                json={
+                    "user_id": user_id,
+                    "chat_name": "default"
+                }
+            )
+            if response.status_code == 200:
+                response_json = response.json()
+                logger.info(f"Chat for user with id {user_id} added successfully.")
+                crud.upsert_user(user_id, last_chat_id=response_json['chat_id'])
+            else:
+                logger.error(f"Error adding chat for user with id {user_id}: {response.json()['message']}")
+
+        last_chat_id = crud.get_last_chat_id(user_id)
+
+        prompt = config.prompts[1]["prompt"]
+        print(prompt)
+        response = requests.post(
+                f"{base_url}/model/query",
+                json={
+                    "user_id": user_id,
+                    "chat_id": last_chat_id,
+                    "user_message": prompt.format(user_message=user_message)
+                }
+            )
+        response_content = response.json()["model_response"]["response_content"]
+        try:
+            extract_and_save_html(response_content)
+            logger.info("HTML content extracted and saved successfully.")
+        except:
+            bot.reply_to(message, response_content, parse_mode="markdown")

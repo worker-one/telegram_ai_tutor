@@ -21,6 +21,8 @@ strings:
       billing: "Billing"
       feedback: "Feedback"
     ask_query: "Enter your problem in text or send an image"
+    response:
+      step_by_step: "Step-by-step explanation avaliable at the link: {link}"
     
 prompts:
   - id: 1

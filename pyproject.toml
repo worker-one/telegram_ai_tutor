@@ -7,9 +7,6 @@ name = "telegram_ai_tutor"
 version = "0.1.0"  #
 description = "A telegram interface to llm chatbot"
 readme = "README.md"
-authors = [
-    {name = "Konstantin Verner"},
-]
 
 classifiers = [  #
     "Development Status :: 5 - Production/Stable",

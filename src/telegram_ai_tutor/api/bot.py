@@ -6,8 +6,9 @@ import telebot
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 
-from telegram_ai_tutor.api.handlers import chats, llm, menu, users
+from telegram_ai_tutor.api.handlers import chats, menu, short, step_by_step, users
 from telegram_ai_tutor.db import crud
+from telegram_ai_tutor.src.telegram_ai_tutor.api.handlers import step_by_step
 
 # Load logging configuration with OmegaConf
 logging_config = OmegaConf.to_container(
@@ -56,8 +57,9 @@ def help_command(message):
 def start_bot():
     logger.info(msg=f"Bot `{str(bot.get_me().username)}` has started")
     chats.register_handlers(bot)
-    llm.register_handlers(bot)
     users.register_handlers(bot)
     menu.register_handlers(bot)
+    short.register_handlers(bot)
+    step_by_step.register_handlers(bot)
     #bot.infinity_polling()
     bot.polling()

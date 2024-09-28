@@ -35,11 +35,9 @@ def register_handlers(bot):
         bot.send_message(call.message.chat.id, strings[lang].ask_query)
         bot.register_next_step_handler(call.message, _step_by_step_mode)
 
-    @bot.message_handler(content_types=['text'], func=lambda message: message.text[0] != "/")
+    @bot.message_handler(content_types=['text', 'photo', 'document'], func=lambda message: message.text[0] != "/")
     def _step_by_step_mode(message: Message) -> None:
         user_id = int(message.chat.id)
-        user_message = message.text
-
         # add user to database if not already present
         if not crud.get_user(user_id):
             logger.info(f"User with id {user_id} not found in the database.")
@@ -79,45 +77,148 @@ def register_handlers(bot):
                 logger.error(f"Error adding chat for user with id {user_id}: {response.json()['message']}")
 
         last_chat_id = crud.get_last_chat_id(user_id)
+        if message.content_type == "photo":
+            if message.text:
+                user_message = message.text
+            elif message.caption:
+                user_message = message.caption
+            else:
+                user_message = "the problem is ine the image"
+            prompt = config.prompts[1]["prompt"]
 
-        prompt = config.prompts[1]["prompt"]
-        print(prompt)
-        response = requests.post(
-                f"{base_url}/model/query",
-                json={
+            try:
+                # Get the file ID and download the image
+                file_id = message.photo[-1].file_id
+                file_info = bot.get_file(file_id)
+                file_path = file_info.file_path
+
+                # Download the image
+                downloaded_file = bot.download_file(file_path)
+
+                # Save the image locally
+                if not os.path.exists("./.tmp/photos"):
+                    os.makedirs("./.tmp/photos")
+
+                user_input_image_path = f"./.tmp/{file_path}"
+                with open(user_input_image_path, "wb") as file:
+                    file.write(downloaded_file)
+
+                # Prepare the image and message for sending
+                files = {"file": open(user_input_image_path, "rb")}
+                data = {
                     "user_id": user_id,
                     "chat_id": last_chat_id,
                     "user_message": prompt.format(user_message=user_message)
                 }
+
+                # Send the request with the image file
+                response = requests.post(
+                    f"{base_url}/model/query",
+                    files=files,  # Send image file
+                    data=data    # Send other form data
+                )
+
+            except Exception as e:
+                logger.error(f"Error downloading image: {e}")
+                bot.reply_to(message, f"Error downloading image: {e}")
+                return
+
+        # if a photo sent as a document
+        elif message.content_type == "document":
+            if message.text:
+                user_message = message.text
+            elif message.caption:
+                user_message = message.caption
+            else:
+                user_message = "the problem is ine the image"
+            prompt = config.prompts[1]["prompt"]
+
+            try:
+                # Get the file ID and download the image
+                file_id = message.document.file_id
+                file_info = bot.get_file(file_id)
+                file_path = file_info.file_path
+
+                # Download the image
+                downloaded_file = bot.download_file(file_path)
+
+                # Save the image locally
+                if not os.path.exists("./.tmp/photos"):
+                    os.makedirs("./.tmp/photos")
+
+                user_input_image_path = f"./.tmp/photos/{file_path}"
+                with open(user_input_image_path, "wb") as file:
+                    file.write(downloaded_file)
+
+                # Prepare the image and message for sending
+                files = {"file": open(user_input_image_path, "rb")}
+                data = {
+                    "user_id": user_id,
+                    "chat_id": last_chat_id,
+                    "user_message": prompt.format(user_message=user_message)
+                }
+
+                # Send the request with the image file
+                response = requests.post(
+                    f"{base_url}/model/query",
+                    files=files,  # Send image file
+                    data=data    # Send other form data
+                )
+            except Exception as e:
+                logger.error(f"Error downloading image: {e}")
+                bot.reply_to(message, f"Error downloading image: {e}")
+                return
+
+        # Handling text content
+        else:
+            user_message = message.text
+            prompt = config.prompts[1]["prompt"]
+
+            # Prepare the text message for sending
+            data = {
+                "user_id": user_id,
+                "chat_id": last_chat_id,
+                "user_message": prompt.format(user_message=user_message)
+            }
+
+            # Send the request with only the text data
+            response = requests.post(
+                f"{base_url}/model/query",
+                json=data  # Send JSON if it's only a text request
             )
-        response_content = response.json()["model_response"]["response_content"]
-        try:
-            # create tmp directory
-            if not os.path.exists(f"./tmp/{user_id}"):
-                os.makedirs(f"./tmp/{user_id}")
-            extract_and_save_html(response_content, output_filename=f"./tmp/{user_id}/output.html")
-            logger.info("HTML content extracted and saved successfully.")
 
-            # Start a simple HTTP server to serve the HTML file
-            class CustomHandler(SimpleHTTPRequestHandler):
-                def translate_path(self, path):
-                    # Serve files from the tmp directory
-                    return os.path.join(os.getcwd(), 'tmp', path.lstrip('/'))
+        # Get response content and handle it
+        if response.status_code == 200:
+            response_content = response.json()["model_response"]["response_content"]
+            try:
+                # create tmp directory
+                if not os.path.exists(f"./tmp/{user_id}"):
+                    os.makedirs(f"./tmp/{user_id}")
+                extract_and_save_html(response_content, output_filename=f"./tmp/{user_id}/output.html")
+                logger.info("HTML content extracted and saved successfully.")
 
-            def start_server():
-                server_address = ('', 8000)  # Serve on all available interfaces, port 8000
-                httpd = HTTPServer(server_address, CustomHandler)
-                httpd.serve_forever()
+                # Start a simple HTTP server to serve the HTML file
+                class CustomHandler(SimpleHTTPRequestHandler):
+                    def translate_path(self, path):
+                        # Serve files from the tmp directory
+                        return os.path.join(os.getcwd(), 'tmp', path.lstrip('/'))
 
-            # Start the server in a new thread
-            server_thread = threading.Thread(target=start_server)
-            server_thread.daemon = True
-            server_thread.start()
+                def start_server():
+                    server_address = ('', 8000)  # Serve on all available interfaces, port 8000
+                    httpd = HTTPServer(server_address, CustomHandler)
+                    httpd.serve_forever()
 
-            # Provide the URL to the user
-            response = strings.response.step_by_step.format(
-                link=f"http://0.0.0.0:8000/{user_id}/output.html"
-            )
-            bot.reply_to(message, response)
-        except:
-            bot.reply_to(message, response_content, parse_mode="markdown")
+                # Start the server in a new thread
+                server_thread = threading.Thread(target=start_server)
+                server_thread.daemon = True
+                server_thread.start()
+
+                # Provide the URL to the user
+                response = strings.response.step_by_step.format(
+                    link=f"http://0.0.0.0:8000/{user_id}/output.html"
+                )
+                bot.reply_to(message, response)
+            except:
+                bot.reply_to(message, response_content, parse_mode="markdown")
+        else:
+            bot.reply_to(message, "Error querying model")

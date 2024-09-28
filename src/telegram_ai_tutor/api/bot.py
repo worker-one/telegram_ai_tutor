@@ -8,7 +8,7 @@ from omegaconf import OmegaConf
 
 from telegram_ai_tutor.api.handlers import chats, menu, short, step_by_step, users
 from telegram_ai_tutor.db import crud
-from telegram_ai_tutor.src.telegram_ai_tutor.api.handlers import step_by_step
+from telegram_ai_tutor.api.handlers import step_by_step
 
 # Load logging configuration with OmegaConf
 logging_config = OmegaConf.to_container(

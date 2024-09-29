@@ -6,6 +6,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import requests
 from omegaconf import OmegaConf
 from telebot.types import Message
+from dotenv import find_dotenv, load_dotenv
 
 from telegram_ai_tutor.api.handlers.common import download_file, prepare_prompt, register_user_and_chat
 from telegram_ai_tutor.utils.html import extract_and_save_html
@@ -21,6 +22,13 @@ logger = logging.getLogger(__name__)
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
 base_url = config.service.base_url
 strings = config.strings
+
+load_dotenv(find_dotenv(usecwd=True))
+
+# Retrieve environment variables
+HOST = os.getenv("HOST")
+PORT = os.getenv("PORT")
+
 
 def register_handlers(bot):
     @bot.callback_query_handler(func=lambda call: call.data == "_step_by_step_mode")
@@ -55,8 +63,10 @@ def register_handlers(bot):
         if response.status_code == 200:
             response_content = response.json()["model_response"]["response_content"]
             if not os.path.exists(f"./.tmp/html/{user.user_id}"):
+                if not os.path.exists(f"./.tmp/html"):
+                    os.makedirs(f"./.tmp/html")
                 os.makedirs(f"./.tmp/html/{user.user_id}")
-            extract_and_save_html(response_content, output_filename=f"./tmp/html/{user.user_id}/output.html")
+            extract_and_save_html(response_content, output_filename=f"./.tmp/html/{user.user_id}/output.html")
             logger.info("HTML content extracted and saved successfully.")
 
             class CustomHandler(SimpleHTTPRequestHandler):
@@ -64,7 +74,7 @@ def register_handlers(bot):
                     return os.path.join(os.getcwd(), 'tmp', path.lstrip('/'))
 
             def start_server():
-                server_address = ('', 8000)
+                server_address = (HOST, int(PORT))
                 httpd = HTTPServer(server_address, CustomHandler)
                 httpd.serve_forever()
 
@@ -73,7 +83,7 @@ def register_handlers(bot):
             server_thread.start()
 
             response = strings[user.language].response.step_by_step.format(
-                link=f"http://0.0.0.0:8000/{user.user_id}/output.html"
+                link=f"{HOST}:{PORT}/{user.user_id}/output.html"
             )
             bot.reply_to(message, response)
         else:

@@ -74,8 +74,7 @@ def register_handlers(bot):
                     return os.path.join(os.getcwd(), '.tmp', path.lstrip('/'))
 
             def start_server():
-                server_address = (HOST, int(PORT))
-                print(f"Serving on {HOST}:{PORT}")
+                server_address = ("", int(PORT))
                 httpd = HTTPServer(server_address, CustomHandler)
                 httpd.serve_forever()
 

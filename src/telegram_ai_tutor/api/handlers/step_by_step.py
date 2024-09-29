@@ -63,28 +63,29 @@ def register_handlers(bot):
         if response.status_code == 200:
             response_content = response.json()["model_response"]["response_content"]
             if not os.path.exists(f"./.tmp/html/{user.user_id}"):
-                if not os.path.exists(f"./.tmp/html"):
-                    os.makedirs(f"./.tmp/html")
+                if not os.path.exists("./.tmp/html"):
+                    os.makedirs("./.tmp/html")
                 os.makedirs(f"./.tmp/html/{user.user_id}")
             extract_and_save_html(response_content, output_filename=f"./.tmp/html/{user.user_id}/output.html")
             logger.info("HTML content extracted and saved successfully.")
 
             class CustomHandler(SimpleHTTPRequestHandler):
                 def translate_path(self, path):
-                    return os.path.join(os.getcwd(), 'tmp', path.lstrip('/'))
+                    return os.path.join(os.getcwd(), '.tmp', path.lstrip('/'))
 
             def start_server():
                 server_address = (HOST, int(PORT))
-                print(server_address)
+                print(f"Serving on {HOST}:{PORT}")
                 httpd = HTTPServer(server_address, CustomHandler)
                 httpd.serve_forever()
 
+            # Start server in a daemon thread
             server_thread = threading.Thread(target=start_server)
             server_thread.daemon = True
             server_thread.start()
 
             response = strings[user.language].response.step_by_step.format(
-                link=f"{HOST}:{PORT}/{user.user_id}/output.html"
+                link=f"{HOST}:{PORT}/html/{user.user_id}/output.html"
             )
             bot.reply_to(message, response)
         else:

@@ -27,15 +27,25 @@ strings:
 prompts:
   - id: 1
     name: "Short exaplantion"
-    prompt: |
+    prompt_text: |
       Please provide a short explanation
       of the solution for the problem.
       Write final answer to the problem as a json block
       with a key "answer" and a value like "x = 5". \n\nThe problem: `{user_message}`
+    prompt_image: |
+      Please provide a short explanation
+      of the solution for the problem.
+      Write final answer to the problem as a json block
+      with a key "answer" and a value like "x = 5".`
   - id: 2
     name: "Step-by-step explanation."
-    prompt: |
+    prompt_text: |
       Please provide a detailed step-by-step explanation
       of the solution for the problem. Be pedagogical and patient.
       Use latex language to write your formulas. Format your response as a html page
       with latex support. The problem: \n\n{user_message}
+    prompt_image: |
+      Please provide a detailed step-by-step explanation
+      of the solution for the problem. Be pedagogical and patient.
+      Use latex language to write your formulas. Format your response as a html page
+      with latex support.

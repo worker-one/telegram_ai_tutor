@@ -2,6 +2,7 @@ import json
 
 
 def extract_json_from_text(text):
+    text = text.replace("\'", "\"")
     # Find the first '{' character
     start = text.find('{')
     if start == -1:

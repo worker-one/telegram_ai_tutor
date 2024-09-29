@@ -41,9 +41,11 @@ if __name__ == "__main__":
     
     # Step 2: Create the hello.html file
     create_html_file()
+
+    # Step 4: Serve the HTML file
+    serve_html_file()
     
     # Step 3: Start the bot and serve the HTML file on a different thread
     start_bot()
     
-    # Step 4: Serve the HTML file
-    serve_html_file()
+    

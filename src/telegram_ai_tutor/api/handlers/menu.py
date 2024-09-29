@@ -1,6 +1,4 @@
 import logging.config
-from ast import In
-from turtle import up
 
 from omegaconf import OmegaConf
 from telegram_ai_tutor.db import crud

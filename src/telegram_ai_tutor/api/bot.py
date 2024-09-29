@@ -61,5 +61,5 @@ def start_bot():
     menu.register_handlers(bot)
     short.register_handlers(bot)
     step_by_step.register_handlers(bot)
-    #bot.infinity_polling()
-    bot.polling()
+    bot.infinity_polling()
+    #bot.polling()

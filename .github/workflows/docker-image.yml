@@ -24,6 +24,8 @@ jobs:
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_USER=${{ vars.DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> .env
+          echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -36,7 +38,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: workerone/telegram_ai_tutor:latest
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/telegram_ai_tutor:latest
 
       - name: Log out from DockerHub
         run: docker logout

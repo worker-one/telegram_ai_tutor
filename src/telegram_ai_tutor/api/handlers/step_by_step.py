@@ -2,6 +2,7 @@ import logging.config
 import os
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import uuid
 
 import requests
 from omegaconf import OmegaConf
@@ -62,7 +63,8 @@ def register_handlers(bot):
                 if not os.path.exists("./.tmp/html"):
                     os.makedirs("./.tmp/html")
                 os.makedirs(f"./.tmp/html/{user.user_id}")
-            extract_and_save_html(response_content, output_filename=f"./.tmp/html/{user.user_id}/output.html")
+            output_html_name = f"output_{uuid.uuid4()}.html"
+            extract_and_save_html(response_content, output_filename=f"./.tmp/html/{user.user_id}/{output_html_name}")
             logger.info("HTML content extracted and saved successfully.")
 
             class CustomHandler(SimpleHTTPRequestHandler):
@@ -80,7 +82,7 @@ def register_handlers(bot):
             server_thread.start()
 
             response = strings[user.language].response.step_by_step.format(
-                link=f"{HOST}:{PORT}/html/{user.user_id}/output.html"
+                link=f"{HOST}:{PORT}/html/{user.user_id}/{output_html_name}"
             )
             bot.reply_to(message, response)
         else:

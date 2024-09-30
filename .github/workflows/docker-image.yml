@@ -21,6 +21,8 @@ jobs:
           echo "BOT_TOKEN=${{ vars.BOT_TOKEN }}" >> .env
           echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
           echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "HOST=${{ vars.HOST }}" >> .env
+          echo "PORT=${{ vars.PORT }}" >> .env
           echo "DB_NAME=${{ vars.DB_NAME }}" >> .env
           echo "DB_USER=${{ vars.DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> .env

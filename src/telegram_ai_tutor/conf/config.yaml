@@ -1,5 +1,5 @@
 service:
-  base_url: "https://miniature-halibut-jjq5wxxg64q7h566v-8000.app.github.dev"
+  base_url: "94.131.119.139:8080"
 strings:
   ru:
     main_menu: "Главное меню"

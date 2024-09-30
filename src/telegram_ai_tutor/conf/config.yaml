@@ -1,5 +1,5 @@
 service:
-  base_url: "94.131.119.139:8080"
+  base_url: "http://94.131.119.139:8080"
 strings:
   ru:
     main_menu: "Главное меню"

@@ -12,11 +12,7 @@ from telegram_ai_tutor.api.handlers.common import download_file, prepare_prompt,
 from telegram_ai_tutor.utils.html import extract_and_save_html
 
 # Load logging configuration with OmegaConf
-logging_config = OmegaConf.to_container(
-    OmegaConf.load("./src/telegram_ai_tutor/conf/logging_config.yaml"),
-    resolve=True
-)
-logging.config.dictConfig(logging_config)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
@@ -58,7 +54,7 @@ def register_handlers(bot):
         else:
             prompt = config.prompts[1]["prompt_text"].format(user_message=message.text)
             data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
-            response = requests.post(f"{base_url}/model/query", json=data)
+            response = requests.post(f"{base_url}/model/query", data=data)
 
         if response.status_code == 200:
             response_content = response.json()["model_response"]["response_content"]

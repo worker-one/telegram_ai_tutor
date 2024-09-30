@@ -6,12 +6,9 @@ from telebot import TeleBot
 
 
 # Load logging configuration with OmegaConf
-logging_config = OmegaConf.to_container(
-    OmegaConf.load("./src/telegram_ai_tutor/conf/logging_config.yaml"),
-    resolve=True
-)
-logging.config.dictConfig(logging_config)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 cfg = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
 base_url = cfg.service.base_url

@@ -19,7 +19,7 @@ strings = config.strings
 def register_user_and_chat(user_id: int, username: str) -> models.User:
     if not crud.get_user(user_id):
         logger.info(f"User with id {user_id} not found in the database.")
-        crud.upsert_user(user_id, username)
+        crud.upsert_user(user_id, username=username, last_chat_id=1)
 
     response = requests.get(f"{base_url}/users/{user_id}")
     if response.status_code == 404:
@@ -39,7 +39,7 @@ def register_user_and_chat(user_id: int, username: str) -> models.User:
         if response.status_code == 200:
             response_json = response.json()
             logger.info(f"Chat for user with id {user_id} added successfully.")
-            crud.upsert_user(user_id, last_chat_id=response_json['chat_id'])
+            crud.upsert_user(user_id, username=username, last_chat_id=1)
         else:
             logger.error(f"Error adding chat for user with id {user_id}: {response.json()['message']}")
     # Fetch and return the user instance

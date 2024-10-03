@@ -35,6 +35,7 @@ def register_handlers(bot):
     @bot.message_handler(commands=["menu"])
     def menu_menu_command(message):
 
+        # TODO fix bigint
         user_id = message.from_user.id
         username = message.from_user.username
         # add user to database if not already present

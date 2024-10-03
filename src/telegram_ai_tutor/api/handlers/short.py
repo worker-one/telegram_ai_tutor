@@ -1,4 +1,5 @@
 import logging.config
+import os
 
 import requests
 from omegaconf import OmegaConf
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
-base_url = config.service.base_url
+base_url = os.getenv("LLM_API")
 strings = config.strings
 
 def register_handlers(bot):
@@ -39,7 +40,7 @@ def register_handlers(bot):
             try:
                 download_file(bot, file_id, user_input_image_path)
                 files = {"file": open(user_input_image_path, "rb")}
-                data = {"user_id": user.user_id, "chat_id": 1, "user_message": prompt}
+                data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
                 response = requests.post(f"{base_url}/model/query", files=files, data=data)
             except Exception as e:
                 logger.error(f"Error downloading image: {e}")
@@ -47,8 +48,7 @@ def register_handlers(bot):
                 return
         else:
             prompt = config.prompts[0]["prompt_text"].format(user_message=message.text)
-            # TODO fix chat id
-            data = {"user_id": user.user_id, "chat_id": 1, "user_message": prompt}
+            data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
             response = requests.post(f"{base_url}/model/query", data=data)
 
         handle_model_response(bot, message, response, extract_json_from_text)

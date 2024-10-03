@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
-base_url = config.service.base_url
+base_url = os.getenv("LLM_API")
 strings = config.strings
 
 def register_user_and_chat(user_id: int, username: str) -> models.User:

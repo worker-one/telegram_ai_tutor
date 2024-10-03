@@ -1,5 +1,5 @@
 import logging.config
-
+import os
 import requests
 from omegaconf import OmegaConf
 from telebot import types
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 cfg = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
-base_url = cfg.service.base_url
+base_url = os.getenv("LLM_API")
 
 logger.info(f"LLM service base url: {base_url}")
 

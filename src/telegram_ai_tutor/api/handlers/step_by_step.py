@@ -1,13 +1,13 @@
 import logging.config
 import os
 import threading
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 import uuid
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 import requests
+from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from telebot.types import Message
-from dotenv import find_dotenv, load_dotenv
 
 from telegram_ai_tutor.api.handlers.common import download_file, prepare_prompt, register_user_and_chat
 from telegram_ai_tutor.utils.html import extract_and_save_html
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
-base_url = config.service.base_url
+base_url = os.getenv("LLM_API")
 strings = config.strings
 
 load_dotenv(find_dotenv(usecwd=True))
@@ -46,7 +46,7 @@ def register_handlers(bot):
             try:
                 download_file(bot, file_id, user_input_image_path)
                 files = {"file": open(user_input_image_path, "rb")}
-                data = {"user_id": user.user_id, "chat_id": 1, "user_message": prompt}
+                data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
                 response = requests.post(f"{base_url}/model/query", files=files, data=data)
             except Exception as e:
                 logger.error(f"Error downloading image: {e}")
@@ -54,7 +54,7 @@ def register_handlers(bot):
                 return
         else:
             prompt = config.prompts[1]["prompt_text"].format(user_message=message.text)
-            data = {"user_id": user.user_id, "chat_id":1, "user_message": prompt}
+            data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
             response = requests.post(f"{base_url}/model/query", data=data)
 
         if response.status_code == 200:

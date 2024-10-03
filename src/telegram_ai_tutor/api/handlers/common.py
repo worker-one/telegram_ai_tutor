@@ -75,4 +75,4 @@ def handle_model_response(bot, message: Message, response, extract_json_from_tex
         else:
             bot.reply_to(message, response_content, parse_mode="markdown")
     else:
-        bot.reply_to(message, "Error querying model")
+        bot.reply_to(message, f"Error querying model: {response.text}")

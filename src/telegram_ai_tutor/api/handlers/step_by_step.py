@@ -54,7 +54,7 @@ def register_handlers(bot):
                 return
         else:
             prompt = config.prompts[1]["prompt_text"].format(user_message=message.text)
-            data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
+            data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt*10000}
             response = requests.post(f"{base_url}/model/query", data=data)
 
         if response.status_code == 200:
@@ -86,4 +86,4 @@ def register_handlers(bot):
             )
             bot.reply_to(message, response)
         else:
-            bot.reply_to(message, "Error querying model")
+            bot.reply_to(message, f"Error querying model: {response.text}")

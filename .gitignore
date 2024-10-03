@@ -169,5 +169,6 @@ tags
 .ruff_cache
 
 # temp
+.tmp
 tmp/
 temp/

@@ -28,6 +28,7 @@ jobs:
           echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> .env
           echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
           echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+          echo "LLM_API=${{ vars.LLM_API }}" >> .env
 
       - name: Login to DockerHub
         uses: docker/login-action@v2

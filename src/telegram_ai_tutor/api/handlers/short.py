@@ -32,7 +32,7 @@ def register_handlers(bot):
     @bot.message_handler(content_types=['text', 'photo', 'document'], func=lambda message: message.text[0] != "/")
     def _short_mode(message: Message) -> None:
         user = register_user_and_chat(int(message.chat.id), message.chat.username)
-
+        bot.send_message(message.chat.id, f"Your request has been received.")
         if message.content_type in ["photo", "document"]:
             prompt = prepare_prompt(message, config.prompts[0]["prompt_text"], config.prompts[0]["prompt_image"])
             file_id = message.photo[-1].file_id if message.content_type == "photo" else message.document.file_id

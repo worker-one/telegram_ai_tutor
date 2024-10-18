@@ -55,13 +55,33 @@ def download_file(bot, file_id, file_path):
         file.write(downloaded_file)
     return file_path
 
-def prepare_prompt(message: Message, prompt_text: str, prompt_image: str):
-    if message.text:
-        return prompt_text.format(user_message=message.text)
-    elif message.caption:
-        return prompt_text.format(user_message=message.caption)
+def prepare_prompt(message: Message, prompts: dict[str, str]) -> str:
+    """
+    Prepares a prompt based on the message content and predefined prompts.
+
+    Args:
+        message (Message): The message object containing user input.
+        prompts (dict[str, str]): A dictionary of prompt templates.
+
+    Returns:
+        str: The formatted prompt string.
+    """
+    base_prompt = prompts.base
+    # if text and image or document are provided
+    if message.caption and (message.photo or message.document):
+        return prompts.image_text_input.format(
+            image_input=prompts.image_input.format(base=base_prompt),
+            user_message=message.caption
+        )
+    # if only text is provided
+    elif message.text:
+        return prompts.text_input.format(
+            base=base_prompt,
+            user_message=message.text
+        )
+    # if only image is provided
     else:
-        return prompt_image
+        return prompts.image_input.format(base=base_prompt)
 
 def handle_model_response(bot, message: Message, response, extract_json_from_text=None):
     if response.status_code == 200:
@@ -70,7 +90,8 @@ def handle_model_response(bot, message: Message, response, extract_json_from_tex
             try:
                 json_content = extract_json_from_text(response_content)
                 bot.reply_to(message, json_content["answer"], parse_mode="markdown")
-            except:
+            except Exception as e:
+                logger.error(f"Error extracting JSON from text: {e}")
                 bot.reply_to(message, response_content, parse_mode="markdown")
         else:
             bot.reply_to(message, response_content, parse_mode="markdown")

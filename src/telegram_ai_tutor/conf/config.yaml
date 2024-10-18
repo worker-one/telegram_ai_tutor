@@ -1,5 +1,3 @@
-service:
-  base_url: "http://94.131.119.139:8080"
 strings:
   ru:
     main_menu: "Главное меню"
@@ -27,33 +25,25 @@ strings:
 prompts:
   - id: 1
     name: "Short exaplantion"
-    prompt_text: |
-      Please provide a short explanation
-      of the solution for the problem.
-      Write final answer to the problem as a json block
-      with a key "answer" and a value like "x = 5". \n\nThe problem: `{user_message}`
-      If the problem is not correct or it is not mathematical problem, inform the user
-      that one needs to state correct mathematical problem.
-    prompt_image: |
-      Please provide a short explanation
-      of the solution for the problem.
-      Write final answer to the problem as a json block
-      with a key "answer" and a value like "x = 5".`
-      If the problem is not correct or it is not mathematical problem, inform the user
-      that one needs to state correct mathematical problem.
+    base: |
+      Please provide a short explanation of the solution for the problem.
+      Write final answer to the problem as a json block with a key "answer" and a value like "x = 5".
+      If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
+    text_intput: |
+      {base} The problem: {user_message}
+    image_input: |
+      {base} The problem is statued in the image.
+    image_text_input: |
+      {image_input} The comment to the image is: {user_message}
   - id: 2
     name: "Step-by-step explanation."
-    prompt_text: |
-      Please provide a detailed step-by-step explanation
-      of the solution for the problem. Be pedagogical and patient.
-      Use latex language to write your formulas. Format your response as a html page
-      with latex support. The problem: \n\n{user_message}
-      If the problem is not correct or it is not mathematical problem, inform the user
-      that one needs to state correct mathematical problem.
-    prompt_image: |
-      Please provide a detailed step-by-step explanation
-      of the solution for the problem. Be pedagogical and patient.
-      Use latex language to write your formulas. Format your response as a html page
-      with latex support.
-      If the problem is not correct or it is not mathematical problem, inform the user
-      that one needs to state correct mathematical problem.
+    base: |
+      Please provide a detailed step-by-step explanation of the solution for the problem. Be pedagogical and patient.
+      Use latex language to write your formulas. Format your response as a html page with latex support.
+      If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
+    text_intput: |
+      {base} The problem: {user_message}
+    image_input: |
+      {base} The problem is statued in the image.
+    image_text_input: |
+      {image_input} The comment to the image is: {user_message}

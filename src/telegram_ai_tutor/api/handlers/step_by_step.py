@@ -40,7 +40,7 @@ def register_handlers(bot):
         user = register_user_and_chat(int(message.chat.id), message.chat.username)
         bot.send_message(message.chat.id, f"Your request has been received.")
         if message.content_type in ["photo", "document"]:
-            prompt = prepare_prompt(message, config.prompts[1]["prompt_text"], config.prompts[1]["prompt_image"])
+            prompt = prepare_prompt(message, config.prompts[1])
             file_id = message.photo[-1].file_id if message.content_type == "photo" else message.document.file_id
             user_input_image_path = f"./.tmp/photos/{file_id}"
             try:
@@ -53,7 +53,7 @@ def register_handlers(bot):
                 bot.reply_to(message, f"Error downloading image: {e}")
                 return
         else:
-            prompt = config.prompts[1]["prompt_text"].format(user_message=message.text)
+            prompt = prepare_prompt(message, config.prompts[1])
             data = {"user_id": user.user_id, "chat_id": user.last_chat_id, "user_message": prompt}
             response = requests.post(f"{base_url}/model/query", data=data)
 

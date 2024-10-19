@@ -41,6 +41,11 @@ def create_tables():
     engine = get_enginge()
     Base.metadata.create_all(engine)
     logger.info("Tables created")
+    
+def drop_tables():
+    engine = get_enginge()
+    Base.metadata.drop_all(engine)
+    logger.info("Tables dropped")
 
 def get_session():
     engine = get_enginge()

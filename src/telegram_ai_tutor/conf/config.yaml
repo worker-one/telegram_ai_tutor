@@ -9,6 +9,10 @@ strings:
       billing: "Тарифный план"
       feedback: "Обратная связь"
     ask_query: "Введите вашу задачу текстом или отправьте изображение"
+    ask_feedback_rating: "Оцените качество работы сервиса от 1 до 5"
+    ask_feedback_comment: "Вы так же можете оставить комментарий"
+    feedback_saved: "Ваш отзыв сохранен"
+    skip: "Пропустить"
   en:
     main_menu: "Main menu"
     menu:
@@ -19,6 +23,10 @@ strings:
       billing: "Billing"
       feedback: "Feedback"
     ask_query: "Enter your problem in text or send an image"
+    ask_feedback_rating: "Rate the quality of the service from 1 to 5"
+    ask_feedback_comment: "You can also leave a comment"
+    skip: "Skip"
+    feedback_saved: "Your feedback is saved"
     response:
       step_by_step: "Step-by-step explanation avaliable at the link: {link}"
     

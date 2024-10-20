@@ -1,8 +1,10 @@
 import logging
+
 from omegaconf import OmegaConf
-from telegram_ai_tutor.db import crud
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from telebot import TeleBot
+from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+
+from telegram_ai_tutor.db import crud
 
 # Load logging configuration with OmegaConf
 logging.basicConfig(level=logging.INFO)
@@ -11,9 +13,6 @@ logger = logging.getLogger(__name__)
 config = OmegaConf.load("./src/telegram_ai_tutor/conf/config.yaml")
 strings = config.strings
 
-# TODO: user sessions
-user_sessions = {}
-
 def create_main_menu_markup(strings):
     menu_markup = InlineKeyboardMarkup(row_width=1)
     menu_markup.add(
@@ -21,6 +20,7 @@ def create_main_menu_markup(strings):
         InlineKeyboardButton(strings.menu.step_by_step_mode, callback_data="_step_by_step_mode"),
         InlineKeyboardButton(strings.menu.billing, callback_data="_billing"),
         InlineKeyboardButton(strings.menu.feedback, callback_data="_feedback"),
+        InlineKeyboardButton(strings.menu.change_language, callback_data="_change_language"),  # New button
     )
     return menu_markup
 
@@ -49,14 +49,12 @@ def register_handlers(bot: TeleBot):
         user_id = message.from_user.id
         username = message.from_user.username
 
-        if not crud.get_user(user_id):
-            crud.upsert_user(user_id, username)
-        if not user_sessions.get(user_id):
-            user_sessions[user_id] = {}
-            user_sessions[user_id]["lang"] = "en"
-
         user = crud.get_user(user_id)
-        lang = user_sessions[user_id]["lang"]
+        if not user:
+            crud.upsert_user(user_id, username)
+            user = crud.get_user(user_id)
+        
+        lang = user.lang
         logger.info({"user_id": message.from_user.id, "message": message.text})
 
         main_menu_markup = create_main_menu_markup(strings[lang])
@@ -64,7 +62,9 @@ def register_handlers(bot: TeleBot):
 
     @bot.callback_query_handler(func=lambda call: call.data == "_language")
     def language(call):
-        lang = "en"
+        user_id = call.from_user.id
+        user = crud.get_user(user_id)
+        lang = user.lang
         logger.info({"user_id": call.from_user.id, "message": call.data})
 
         lang_menu_markup = create_lang_menu_markup(strings[lang])
@@ -74,7 +74,7 @@ def register_handlers(bot: TeleBot):
     def feedback(call: CallbackQuery):
         user_id = call.from_user.id
         user = crud.get_user(user_id)
-        lang = user_sessions[user_id]["lang"]
+        lang = user.lang
         logger.info({"user_id": call.from_user.id, "message": call.data})
 
         feedback_rating_markup = create_feedback_rating_markup()
@@ -84,7 +84,8 @@ def register_handlers(bot: TeleBot):
     def feedback_rating(call: CallbackQuery):
         user_id = call.from_user.id
         rating = int(call.data.split("_")[-1])
-        lang = user_sessions[user_id]["lang"]
+        user = crud.get_user(user_id)
+        lang = user.lang
 
         bot.send_message(
             call.message.chat.id,
@@ -94,10 +95,10 @@ def register_handlers(bot: TeleBot):
         bot.register_next_step_handler(call.message, save_feedback_comment, user_id, rating)
 
     def save_feedback_comment(message, user_id=None, rating=None):
-        lang = user_sessions[user_id]["lang"]
+        user = crud.get_user(user_id)
+        lang = user.lang
         feedback_text = message.text if message.text.lower() != strings[lang].skip.lower() else None
         crud.save_feedback(user_id, rating, feedback_text)
-        lang = user_sessions[user_id]["lang"]
         main_menu_markup = create_main_menu_markup(strings[lang])
         bot.send_message(message.chat.id, strings[lang].feedback_saved)
         bot.send_message(message.chat.id, strings[lang].main_menu, reply_markup=main_menu_markup)
@@ -106,7 +107,8 @@ def register_handlers(bot: TeleBot):
     def save_feedback_no_comment(call: CallbackQuery):
         user_id = call.from_user.id
         rating = int(call.data.split("_")[-1])
-        lang = user_sessions[user_id]["lang"]
+        user = crud.get_user(user_id)
+        lang = user.lang
         crud.save_feedback(user_id, rating)
         main_menu_markup = create_main_menu_markup(strings[lang])
         bot.send_message(call.message.chat.id, strings[lang].feedback_saved)
@@ -115,3 +117,26 @@ def register_handlers(bot: TeleBot):
             strings[lang].main_menu,
             reply_markup=main_menu_markup
         )
+
+    @bot.callback_query_handler(func=lambda call: call.data == "_change_language")  # New handler
+    def change_language(call: CallbackQuery):
+        user_id = call.from_user.id
+        user = crud.get_user(user_id)
+        lang = user.lang
+        logger.info({"user_id": call.from_user.id, "message": call.data})
+
+        lang_menu_markup = create_lang_menu_markup(strings[lang])
+        bot.send_message(call.message.chat.id, strings[lang].menu.language, reply_markup=lang_menu_markup)
+
+    @bot.callback_query_handler(func=lambda call: call.data in ["_en", "_ru"])  # New handler
+    def set_language(call: CallbackQuery):
+        user_id = call.from_user.id
+        new_lang = call.data.strip("_")
+        crud.update_user_language(user_id, new_lang)
+        user = crud.get_user(user_id)
+        lang = user.lang
+        logger.info({"user_id": call.from_user.id, "message": call.data})
+
+        main_menu_markup = create_main_menu_markup(strings[lang])
+        bot.send_message(call.message.chat.id, strings[lang].language_updated)
+        bot.send_message(call.message.chat.id, strings[lang].main_menu, reply_markup=main_menu_markup)

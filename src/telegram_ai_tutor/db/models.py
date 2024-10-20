@@ -19,6 +19,7 @@ class User(Base):
 
     id = Column(BigInteger, primary_key=True)
     name = Column(String)
+    lang = Column(String)
     last_chat_id = Column(Integer)
 
     messages = relationship("Message", back_populates="user")

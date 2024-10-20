@@ -8,11 +8,15 @@ strings:
       step_by_step_mode: "Пошаговое объяснение"
       billing: "Тарифный план"
       feedback: "Обратная связь"
+      change_language: "Изменить язык"
+    language_en : "Английский"
+    language_ru : "Русский"
     ask_query: "Введите вашу задачу текстом или отправьте изображение"
     ask_feedback_rating: "Оцените качество работы сервиса от 1 до 5"
     ask_feedback_comment: "Вы так же можете оставить комментарий"
     feedback_saved: "Ваш отзыв сохранен"
     skip: "Пропустить"
+    language_updated: "Язык успешно обновлен"
   en:
     main_menu: "Main menu"
     menu:
@@ -22,36 +26,67 @@ strings:
       step_by_step_mode: "Step-by-step explanation"
       billing: "Billing"
       feedback: "Feedback"
+      change_language: "Change language"
+    language_en : "English"
+    language_ru : "Russian"
     ask_query: "Enter your problem in text or send an image"
     ask_feedback_rating: "Rate the quality of the service from 1 to 5"
     ask_feedback_comment: "You can also leave a comment"
     skip: "Skip"
     feedback_saved: "Your feedback is saved"
+    language_updated: "Language successfully updated"
     response:
-      step_by_step: "Step-by-step explanation avaliable at the link: {link}"
+      step_by_step: "Step-by-step explanation available at the link: {link}"
     
 prompts:
-  - id: 1
-    name: "Short exaplantion"
-    base: |
-      Please provide a short explanation of the solution for the problem.
-      Write final answer to the problem as a json block with a key "answer" and a value like "x = 5".
-      If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
-    text_intput: |
-      {base} The problem: {user_message}
-    image_input: |
-      {base} The problem is statued in the image.
-    image_text_input: |
-      {image_input} The comment to the image is: {user_message}
-  - id: 2
-    name: "Step-by-step explanation."
-    base: |
-      Please provide a detailed step-by-step explanation of the solution for the problem. Be pedagogical and patient.
-      Use latex language to write your formulas. Format your response as a html page with latex support.
-      If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
-    text_intput: |
-      {base} The problem: {user_message}
-    image_input: |
-      {base} The problem is statued in the image.
-    image_text_input: |
-      {image_input} The comment to the image is: {user_message}
+  en:
+    - id: 1
+      name: "Short explanation"
+      base: |
+        Please provide a short explanation of the solution for the problem.
+        Write final answer to the problem as a json block with a key "answer" and a value like "x = 5".
+        If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
+      text_input: |
+        {base} The problem: {user_message}
+      image_input: |
+        {base} The problem is stated in the image.
+      image_text_input: |
+        {image_input} The comment to the image is: {user_message}
+    - id: 2
+      name: "Step-by-step explanation."
+      base: |
+        Please provide a detailed step-by-step explanation of the solution for the problem. Be pedagogical and patient.
+        Use latex language to write your formulas. Format your response as a html page with latex support.
+        If the problem is not correct or it is not mathematical problem, inform the user that one needs to state correct mathematical problem.
+      text_input: |
+        {base} The problem: {user_message}
+      image_input: |
+        {base} The problem is stated in the image.
+      image_text_input: |
+        {image_input} The comment to the image is: {user_message}
+
+  ru:
+    - id: 1
+      name: "Краткое объяснение"
+      base: |
+        Пожалуйста, предоставьте краткое объяснение решения задачи.
+        Напишите конечный ответ на задачу в виде json блока с ключом "answer" и значением вида "x = 5".
+        Если задача некорректна или это не математическая задача, сообщите пользователю, что нужно сформулировать корректную математическую задачу.
+      text_input: |
+        {base} Задача: {user_message}
+      image_input: |
+        {base} Задача сформулирована на изображении.
+      image_text_input: |
+        {image_input} Комментарий к изображению: {user_message}
+    - id: 2
+      name: "Пошаговое объяснение"
+      base: |
+        Пожалуйста, предоставьте подробное пошаговое объяснение решения задачи. Будьте педагогичны и терпеливы.
+        Используйте язык latex для написания ваших формул. Форматируйте ваш ответ как html страницу с поддержкой latex.
+        Если задача некорректна или это не математическая задача, сообщите пользователю, что нужно сформулировать корректную математическую задачу.
+      text_input: |
+        {base} Задача: {user_message}
+      image_input: |
+        {base} Задача сформулирована на изображении.
+      image_text_input: |
+        {image_input} Комментарий к изображению: {user_message}
